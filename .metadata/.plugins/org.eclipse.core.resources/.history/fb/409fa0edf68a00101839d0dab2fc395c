@@ -1,0 +1,49 @@
+package IMPL;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+import DAO.CustomerDao;
+import POJO.Customer;
+import UTILITY.DBUtility;
+
+public class CustomerDaoImpl implements  CustomerDao{
+
+	
+	public boolean registerCustomer(Customer customer) {
+		// TODO Auto-generated method stub
+		Connection conn=DBUtility.getConnect();
+		
+		try {
+			String sql="insert into customers (name,email,password,phone)values(?,?,?,?)";
+			PreparedStatement ps=conn.prepareStatement(sql);
+			ps.setString(1, customer.getName());
+			ps.setString(2, customer.getEmail());
+			ps.setString(3, customer.getPassword());
+			ps.setString(4, customer.getPhone());
+			
+			int i= ps.executeUpdate();
+			if(i>0)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return false;
+	}
+
+	
+	public Customer login(String email, String password) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+
+}

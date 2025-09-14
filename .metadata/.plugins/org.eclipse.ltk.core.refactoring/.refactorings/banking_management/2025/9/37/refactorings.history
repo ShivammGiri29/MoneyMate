@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename compilation unit &apos;DAO.LoginDao.java&apos; to &apos;AdminDao.java&apos;&#x0D;&#x0A;- Original project: &apos;banking_management&apos;&#x0D;&#x0A;- Original element: &apos;DAO.LoginDao.java&apos;&#x0D;&#x0A;- Renamed element: &apos;DAO.AdminDao.java&apos;" description="Rename compilation unit &apos;LoginDao.java&apos;" flags="2" id="org.eclipse.jdt.ui.rename.compilationunit" input="/src&lt;DAO{LoginDao.java" name="AdminDao.java" references="false" stamp="1757228017375" version="1.0"/>
+</session>

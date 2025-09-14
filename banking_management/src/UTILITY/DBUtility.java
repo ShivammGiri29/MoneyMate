@@ -1,0 +1,26 @@
+package UTILITY;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class DBUtility {
+	
+	public static Connection getConnect()
+	{
+		Connection conn=null;
+		
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			String url="jdbc:mysql://localhost:3306/banking";
+			String username="root";
+			String pass="Shivam@143";
+			conn=DriverManager.getConnection(url,username,pass);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return conn;
+
+	}
+}

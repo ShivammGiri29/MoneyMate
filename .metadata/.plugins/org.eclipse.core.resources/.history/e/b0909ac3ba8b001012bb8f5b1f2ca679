@@ -1,0 +1,73 @@
+package TEST;
+
+import java.util.Scanner;
+import DAO.AdminDao;
+import IMPL.AdminDaoImpl;
+
+public class AdminTest {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        AdminDao admindao = new AdminDaoImpl();
+
+        System.out.println("===== Admin Login =====");
+        System.out.print("Enter Username: ");
+        String uname = sc.next();
+        System.out.print("Enter Password: ");
+        String pass = sc.next();
+
+        boolean loginSuccess = admindao.login(uname, pass);
+
+        if (!loginSuccess) {
+            System.out.println("❌ Invalid Admin Credentials!");
+            return;
+        }
+
+        System.out.println("\n✅ Welcome, " + uname);
+
+        int choice;
+        do {
+            System.out.println("\n===== Admin Menu =====");
+            System.out.println("1. View All Accounts");
+            System.out.println("2. Search Account by AccountNo");
+            System.out.println("3. View All Transactions");
+            System.out.println("4. Delete Account");
+            System.out.println("5. Logout");
+
+            System.out.print("Enter your choice: ");
+            choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    admindao.viewAllAccounts();
+                    break;
+
+                case 2:
+                    System.out.print("Enter Account Number: ");
+                    String accNo = sc.next();
+                    admindao.searchAccount(accNo);
+                    break;
+
+                case 3:
+                    admindao.viewAllTransactions();
+                    break;
+
+                
+                case 5:
+                    System.out.print("Enter Account Number to Delete: ");
+                    String accNo3 = sc.next();
+                    admindao.deleteAccount(accNo3);
+                    break;
+
+                case 6:
+                    System.out.println("Logged out successfully!");
+                    break;
+
+                default:
+                    System.out.println("❌ Invalid Choice!");
+            }
+
+        } while (choice != 0);
+
+        sc.close();
+    }
+}

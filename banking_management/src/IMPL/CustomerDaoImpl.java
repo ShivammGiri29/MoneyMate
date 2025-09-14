@@ -1,0 +1,74 @@
+package IMPL;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import DAO.CustomerDao;
+import POJO.Customer;
+import UTILITY.DBUtility;
+
+public class CustomerDaoImpl implements  CustomerDao{
+
+	
+	public boolean registerCustomer(Customer customer) {
+		// TODO Auto-generated method stub
+		Connection conn=DBUtility.getConnect();
+		
+		try {
+			String sql="insert into customers (name,email,password,phone)values(?,?,?,?)";
+			PreparedStatement ps=conn.prepareStatement(sql);
+			ps.setString(1, customer.getName());
+			ps.setString(2, customer.getEmail());
+			ps.setString(3, customer.getPassword());
+			ps.setString(4, customer.getPhone());
+			
+			int i= ps.executeUpdate();
+			if(i>0)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+
+	
+	@Override
+	public Customer login(String email, String password) {
+	    Customer c = null;
+	    Connection conn = DBUtility.getConnect();
+	    try {
+	        
+	        String sql = "SELECT * FROM customers WHERE email=? AND password=?";
+	        PreparedStatement ps = conn.prepareStatement(sql);
+	        ps.setString(1, email);
+	        ps.setString(2, password);
+
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            
+	            c = new Customer();
+	            c.setCustomerId(rs.getInt("customer_id")); 
+	            c.setName(rs.getString("name"));
+	            c.setEmail(rs.getString("email"));
+	            c.setPassword(rs.getString("password"));
+	            c.setPhone(rs.getString("phone"));
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return c;
+	}
+	
+
+}

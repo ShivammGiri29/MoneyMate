@@ -1,0 +1,13 @@
+package DAO;
+
+import POJO.Account;
+
+public interface AccountDAo {
+	
+	boolean createAccount(Account account);
+    Account getAccountByNumber(String accountNumber);
+    double getBalance(String accountNumber,int pin);
+    boolean deposit(String accountno, double amount);
+    boolean withdraw(String accountno, double amount);
+
+}

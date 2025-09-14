@@ -1,0 +1,11 @@
+package DAO;
+
+import java.util.List;
+
+import POJO.Transaction;
+
+public interface TransactionDao {
+	void recordTransaction(int accountId, String type, double amount);
+    List<Transaction> getTransactions(int accountId);
+
+}

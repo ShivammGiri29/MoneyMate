@@ -1,0 +1,50 @@
+package IMPL;
+
+import DAO.AccountDAo;
+import DAO.AccountDAo;
+import POJO.Account;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+public class AccountDaoImpl implements AccountDAo {
+
+    public boolean createAccount(Account account) {
+        boolean status = false;
+        try (Connection con = UTILITY.DBUtility.getConnect()) {
+            String sql = "INSERT INTO accounts (customer_id, account_type, balance, account_number) VALUES (?, ?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, account.getCustomerId());
+            ps.setString(2, account.getAccountType());
+            ps.setDouble(3, account.getBalance());
+            ps.setString(4, account.getAccountNumber());
+
+            int rows = ps.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return status;
+    }
+
+    public Account getAccountByNumber(String accountNumber) {
+        Account acc = null;
+        try (Connection con = UTILITY.DBUtility.getConnect()) {
+            String sql = "SELECT * FROM accounts WHERE account_number=?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, accountNumber);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                acc = new Account();
+                acc.setAccountId(rs.getInt("account_id"));
+                acc.setCustomerId(rs.getInt("customer_id"));
+                acc.setAccountType(rs.getString("account_type"));
+                acc.setBalance(rs.getDouble("balance"));
+                acc.setAccountNumber(rs.getString("account_number"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return acc;
+    }
+}

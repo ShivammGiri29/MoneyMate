@@ -1,0 +1,15 @@
+package DAO;
+
+public interface AdminDao {
+    boolean login(String username, String password);
+
+    void viewAllAccounts();
+
+    void searchAccount(String accountNo);
+
+    void viewAllTransactions();
+
+    void toggleAccountStatus(String accountNo);
+
+    void deleteAccount(String accountNo);
+}

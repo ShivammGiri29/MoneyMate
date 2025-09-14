@@ -1,0 +1,10 @@
+package DAO;
+
+import POJO.Customer;
+
+public interface CustomerDao {
+	
+	boolean registerCustomer(Customer customer);
+    String login(String email, String password);
+
+}

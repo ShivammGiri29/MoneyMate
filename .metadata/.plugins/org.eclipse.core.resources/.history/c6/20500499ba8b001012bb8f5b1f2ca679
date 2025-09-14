@@ -1,0 +1,104 @@
+package IMPL;
+
+import java.sql.*;
+import DAO.AdminDao;
+import UTILITY.DBUtility;
+
+public class AdminDaoImpl implements AdminDao {
+
+	// ✅ Admin Login
+	@Override
+	public boolean login(String username, String password) {
+		Connection conn = DBUtility.getConnect();
+		try {
+			String sql = "SELECT * FROM admin WHERE username=? AND password=?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, username);
+			ps.setString(2, password);
+			ResultSet rs = ps.executeQuery();
+			return rs.next(); // if found, login success
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	@Override
+	public void viewAllAccounts() {
+		Connection conn = DBUtility.getConnect();
+		try {
+			String sql = "SELECT account_id, account_number, balance FROM accounts";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+
+			System.out.println("\n=== All Accounts ===");
+			while (rs.next()) {
+				System.out.println(", accountId: " + rs.getString("account_id") +
+
+						" Account No: " + rs.getString("account_number") + ", Balance: " + rs.getDouble("balance"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void searchAccount(String accountNo) {
+		Connection conn = DBUtility.getConnect();
+		try {
+			String sql = "SELECT account_id, account_number,  balance FROM accounts WHERE account_number=?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, accountNo);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				System.out.println(", accountId: " + rs.getString("account_id") +
+
+						" Account No: " + rs.getString("account_number") + ", Balance: " + rs.getDouble("balance"));
+			} else {
+				System.out.println("❌ Account not found!");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void viewAllTransactions() {
+		Connection conn = DBUtility.getConnect();
+		try {
+			String sql = "SELECT transaction_id, account_number, transaction_type, amount, transaction_date "
+					+ "FROM transactions ORDER BY transaction_date DESC";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+
+			System.out.println("\n=== All Transactions ===");
+			while (rs.next()) {
+				System.out.println("TxnID: " + rs.getInt("transaction_id") + ", Account No: "
+						+ rs.getString("account_number") + ", Type: " + rs.getString("transaction_type") + ", Amount: "
+						+ rs.getDouble("amount") + ", Date: " + rs.getTimestamp("transaction_date"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void deleteAccount(String accountNo) {
+		Connection conn = DBUtility.getConnect();
+		try {
+			String sql = "DELETE FROM accounts WHERE account_number=?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, accountNo);
+
+			int i = ps.executeUpdate();
+			if (i > 0) {
+				System.out.println("✅ Account " + accountNo + " deleted successfully!");
+			} else {
+				System.out.println("❌ Account not found!");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}

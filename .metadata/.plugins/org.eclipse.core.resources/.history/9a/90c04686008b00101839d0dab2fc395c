@@ -1,0 +1,29 @@
+package IMPL;
+
+import java.sql.Connection;
+
+import DAO.AccountDAo;
+import POJO.Account;
+import UTILITY.DBUtility;
+
+public class AccountDaoImpl implements AccountDAo {
+
+	
+	public boolean createAccount(Account account) {
+		// TODO Auto-generated method stub
+		Connection conn=DBUtility.getConnect();
+		try {
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return false;
+	}
+
+
+	public Account getAccountByNumber(String accountNumber) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

@@ -1,0 +1,84 @@
+package TEST;
+
+import java.util.Scanner;
+
+import IMPL.CustomerDaoImpl;
+import POJO.Customer;
+
+public class CustomerTest {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		Scanner sc= new Scanner(System.in);
+		
+		 String name;
+	     String email;
+	     String password;
+	     String phone;
+	     boolean flag;
+	     CustomerDaoImpl cimpl=new CustomerDaoImpl();
+		System.out.println("=========Bank Management========");
+		System.out.println("1. Register /n 2. Login");
+		
+		int choice =sc.nextInt();
+		sc.nextLine();
+		
+		switch(choice)
+		{
+		case 1:
+		{
+			System.out.println("Enter Your Name");
+			name=sc.nextLine();
+			System.out.println("Enter Email");
+			email=sc.nextLine();
+			System.out.println("Enter Your Password");
+			password=sc.nextLine();
+			
+			System.out.println("Enter Your PhoneNo");
+			phone=sc.next();
+			Customer customer=new Customer(name,email,password,phone);
+			flag=cimpl.registerCustomer(customer);
+			
+			if(flag==true)
+			{
+				System.out.println("Register Successfully ");
+			}
+			else
+			{
+				System.out.println("please try again");
+			}
+			
+			
+		}
+		case 2:
+		{
+			System.out.println("Enter Your Email");
+			email=sc.next();
+			
+			System.out.println("Enter your password");
+			password=sc.next();
+			
+			name=cimpl.login(email, password);
+			if(name!=null)
+			{
+				System.out.println("==========WELCOME");
+				
+				
+				
+				
+				
+				
+				
+			}
+			else
+			{
+				System.out.println("please try again");
+			}
+
+			
+		}
+		}
+
+	}
+
+}

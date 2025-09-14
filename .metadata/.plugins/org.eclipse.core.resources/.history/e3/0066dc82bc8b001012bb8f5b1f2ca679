@@ -1,0 +1,206 @@
+package TEST;
+
+import java.util.List;
+import java.util.Scanner;
+
+import IMPL.AccountDaoImpl;
+import IMPL.CustomerDaoImpl;
+import IMPL.TransactionDaoImpl;
+import POJO.Account;
+import POJO.Customer;
+import POJO.Transaction;
+import UTILITY.AccountNumberGenerator;
+
+public class CustomerTest {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		Scanner sc = new Scanner(System.in);
+
+		String name;
+		String email;
+		String password;
+		String phone;
+		boolean flag;
+		CustomerDaoImpl cimpl = new CustomerDaoImpl();
+		AccountDaoImpl aimpl = new AccountDaoImpl();
+		System.out.println("========= Bank Management ========");
+		System.out.println("1. Register \n2. Login\nEnter Your Choice :");
+
+		int choice = sc.nextInt();
+		sc.nextLine();
+
+		switch (choice) {
+		case 1: {
+			System.out.println("Enter Your Name :");
+			name = sc.nextLine();
+			System.out.println("Enter Your Email :");
+			email = sc.nextLine();
+			System.out.println("Enter Your Password :");
+			password = sc.nextLine();
+
+			System.out.println("Enter Your PhoneNo :");
+			phone = sc.next();
+			Customer customer = new Customer(name, email, password, phone);
+			flag = cimpl.registerCustomer(customer);
+
+			if (flag == true) {
+				System.out.println("Register Successfully ");
+			} else {
+				System.out.println("please try again");
+			}break;
+
+		}
+		case 2: {
+			System.out.println("Enter Your Email :");
+			email = sc.next();
+
+			System.out.println("Enter your password :");
+			password = sc.next();
+
+			Customer loggedInCustomer = cimpl.login(email, password);
+			if (loggedInCustomer != null) {
+				System.out.println("========== WELCOME " + loggedInCustomer.getName().toUpperCase() + " ===========");
+				do {
+				System.out.println(
+						"1.Open Account\n2. Deposit Money\n3.Withdraw Money\n4.Check Balance\n5.Send Money\n6.View Transaction\n7.Logout");
+				System.out.println("Enter Your Choice :");
+				int choice2 = sc.nextInt();
+
+				switch (choice2) {
+				case 1: {
+					int customerId = loggedInCustomer.getCustomerId();
+
+					System.out.println("Enter Account Type (SAVINGS/CURRENT): ");
+					String accountType = sc.next();
+
+					System.out.println("Enter Initial Deposit Amount: ");
+					double balance = sc.nextDouble();
+					
+					System.out.println("Create 4 Digit Account PIN :");
+					int pin=sc.nextInt();
+
+					String accountNumber = AccountNumberGenerator.generateAccountNumber();
+					
+
+					Account account = new Account(customerId, accountType, balance, accountNumber,pin);
+					flag = aimpl.createAccount(account);
+					if (flag) {
+						System.out.println("Account created successfully! Account Number: " + accountNumber);
+					} else {
+						System.out.println("Failed to create account.");
+
+					}
+
+				}
+					break;
+				case 2: {
+					System.out.println("Enter Your AccountNo :");
+					String accountno = sc.next();
+					System.out.println("Enter Account PIN :");
+					int pin=sc.nextInt();
+
+
+					System.out.println("Enter Deposit Amount :");
+					double amount = sc.nextDouble();
+
+					flag = aimpl.deposit(accountno, pin,amount);
+					if (flag) {
+						System.out.println(amount + "RS Successfully Deposit to your Account");
+					} else {
+						System.out.println("❌ Deposit Failed!");
+					}
+
+				}
+					break;
+				case 3: {
+					System.out.println("Enter Your AccountNo:");
+					String accountno = sc.next();
+
+					System.out.println("Enter Amount to Withdraw: ");
+					double amount = sc.nextDouble();
+					System.out.println("Enter Account PIN");
+					int pin=sc.nextInt();
+
+					flag = aimpl.withdraw(accountno, pin,amount);
+					if (flag) {
+						System.out.println(amount + "RS WithDraw Successfully");
+					} else {
+						System.out.println("❌ Withdrawal Failed!");
+					}
+				}
+					break;
+				case 4: {
+					System.out.println("Enter Your AccountNo :");
+					String accountno = sc.next();
+					System.out.println("Enter Account PIN:");
+					int pin=sc.nextInt();
+
+
+					double balance = aimpl.getBalance(accountno,pin);
+					System.out.println("💰 Current Balance: " + balance);
+					break;
+
+				}
+				case 5: {
+				    System.out.println("Enter Your Account Number:");
+				    String accountno = sc.next();
+				    System.out.println("Enter Receiver Account Number:");
+				    String accountno2 = sc.next();
+				    System.out.println("Enter Amount:");
+				    double amount = sc.nextDouble();
+				    System.out.println("Enter Your PIN:");
+				    int pin = sc.nextInt();
+
+				    boolean fllag = aimpl.sendmoney(accountno, pin, accountno2, amount);
+				    if (fllag) {
+				        System.out.println("₹" + amount + " successfully transferred to Account: " + accountno2);
+				        // Optional: show updated balance
+				        double balance = aimpl.getBalance(accountno, pin);
+				        System.out.println("Your Updated Balance: ₹" + balance);
+				    } else {
+				        System.out.println("Transaction Failed! Please check your account details or balance.");
+				    }
+				    break;
+				}
+				case 6: {
+					System.out.println("Enter Your AccountNo:");
+					String accountno = sc.next();
+
+					Account acc = aimpl.getAccountByNumber(accountno);
+					if (acc != null) {
+						TransactionDaoImpl tdao = new TransactionDaoImpl();
+						List<Transaction> list = tdao.getTransactions(acc.getAccountNumber());
+
+						if (list.isEmpty()) {
+							System.out.println("No transactions found!");
+						} else {
+							System.out.println("=== Transaction History ===");
+							for (Transaction t : list) {
+								System.out.println(t);
+							}
+						}
+					} else {
+						System.out.println("Invalid Account Number!");
+					}
+					break;
+				}
+				case 7:
+				{
+					return;
+				}
+				
+				}
+				}while(true);
+				
+
+			} else {
+				System.out.println("please try again");
+			}
+
+		}
+		}
+
+	}
+
+}

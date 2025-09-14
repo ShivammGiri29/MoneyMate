@@ -1,0 +1,144 @@
+package IMPL;
+
+import java.sql.*;
+import DAO.AdminDao;
+import UTILITY.DBUtility;
+
+public class AdminDaoImpl implements AdminDao {
+
+    // ✅ Admin Login
+    @Override
+    public boolean login(String username, String password) {
+        Connection conn = DBUtility.getConnect();
+        try {
+            String sql = "SELECT * FROM admin WHERE username=? AND password=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+            return rs.next(); // if found, login success
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // ✅ View All Accounts
+    @Override
+    public void viewAllAccounts() {
+        Connection conn = DBUtility.getConnect();
+        try {
+            String sql = "SELECT account_number, name, balance, status FROM accounts";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+
+            System.out.println("\n=== All Accounts ===");
+            while (rs.next()) {
+                System.out.println("Account No: " + rs.getString("account_number") +
+                        ", Name: " + rs.getString("name") +
+                        ", Balance: " + rs.getDouble("balance") +
+                        ", Status: " + rs.getString("status"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ✅ Search Account
+    @Override
+    public void searchAccount(String accountNo) {
+        Connection conn = DBUtility.getConnect();
+        try {
+            String sql = "SELECT account_number, name, balance, status FROM accounts WHERE account_number=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, accountNo);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                System.out.println("Account No: " + rs.getString("account_number") +
+                        ", Name: " + rs.getString("name") +
+                        ", Balance: " + rs.getDouble("balance") +
+                        ", Status: " + rs.getString("status"));
+            } else {
+                System.out.println("❌ Account not found!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ✅ View All Transactions
+    @Override
+    public void viewAllTransactions() {
+        Connection conn = DBUtility.getConnect();
+        try {
+            String sql = "SELECT transaction_id, account_number, transaction_type, amount, transaction_date " +
+                         "FROM transactions ORDER BY transaction_date DESC";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+
+            System.out.println("\n=== All Transactions ===");
+            while (rs.next()) {
+                System.out.println("TxnID: " + rs.getInt("transaction_id") +
+                        ", Account No: " + rs.getString("account_number") +
+                        ", Type: " + rs.getString("transaction_type") +
+                        ", Amount: " + rs.getDouble("amount") +
+                        ", Date: " + rs.getTimestamp("transaction_date"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ✅ Freeze / Unfreeze Account
+    @Override
+    public void toggleAccountStatus(String accountNo) {
+        Connection conn = DBUtility.getConnect();
+        try {
+            // check current status
+            String check = "SELECT status FROM accounts WHERE account_number=?";
+            PreparedStatement ps = conn.prepareStatement(check);
+            ps.setString(1, accountNo);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String currentStatus = rs.getString("status");
+                String newStatus = currentStatus.equalsIgnoreCase("ACTIVE") ? "FROZEN" : "ACTIVE";
+
+                String sql = "UPDATE accounts SET status=? WHERE account_number=?";
+                PreparedStatement ps2 = conn.prepareStatement(sql);
+                ps2.setString(1, newStatus);
+                ps2.setString(2, accountNo);
+
+                int i = ps2.executeUpdate();
+                if (i > 0) {
+                    System.out.println("✅ Account " + accountNo + " is now " + newStatus);
+                }
+            } else {
+                System.out.println("❌ Account not found!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ✅ Delete Account
+    @Override
+    public void deleteAccount(String accountNo) {
+        Connection conn = DBUtility.getConnect();
+        try {
+            String sql = "DELETE FROM accounts WHERE account_number=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, accountNo);
+
+            int i = ps.executeUpdate();
+            if (i > 0) {
+                System.out.println("✅ Account " + accountNo + " deleted successfully!");
+            } else {
+                System.out.println("❌ Account not found!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

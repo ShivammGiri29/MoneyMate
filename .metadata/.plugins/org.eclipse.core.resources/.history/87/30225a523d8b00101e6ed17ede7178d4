@@ -1,0 +1,61 @@
+package IMPL;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import DAO.TransactionDao;
+import POJO.Transaction;
+import UTILITY.DBUtility;
+
+public class TransactionDaoImpl implements TransactionDao{
+
+	public void recordTransaction(int accountId, String type, double amount) {
+		// TODO Auto-generated method stub
+        Connection conn = DBUtility.getConnect();
+        try {
+            String sql = "INSERT INTO transactions (account_id, transaction_type, amount) VALUES (?, ?, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, accountId);
+            ps.setString(2, type);
+            ps.setDouble(3, amount);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+		
+	}
+
+	public List<Transaction> getTransactions(int accountId) {
+		// TODO Auto-generated method stub
+        List<Transaction> transactions = new ArrayList<>();
+        Connection conn = DBUtility.getConnect();
+        try {
+            String sql = "SELECT * FROM transactions WHERE account_id=? ORDER BY transaction_date DESC";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, accountId);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Transaction t = new Transaction();
+                t.setTransactionId("transaction_id");
+                t.setAccountId(rs.getInt("account_id"));
+                t.setTransactionType(rs.getString("transaction_type"));
+                t.setAmount(rs.getDouble("amount"));
+                t.setTransactionDate(rs.getTimestamp("transaction_date"));
+                transactions.add(t);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return transactions;
+    }
+}
+
+		return null;
+	}
+
+}

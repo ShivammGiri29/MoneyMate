@@ -1,0 +1,266 @@
+package IMPL;
+
+import DAO.AccountDAo;
+import DAO.AccountDAo;
+import POJO.Account;
+import UTILITY.DBUtility;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+public class AccountDaoImpl implements AccountDAo {
+
+	public boolean createAccount(Account account) {
+		boolean status = false;
+		try (Connection con = UTILITY.DBUtility.getConnect()) {
+			String sql = "INSERT INTO accounts (customer_id, account_type, balance, account_number,pin_no) VALUES (?, ?, ?, ?,?)";
+			PreparedStatement ps = con.prepareStatement(sql);
+			ps.setInt(1, account.getCustomerId());
+			ps.setString(2, account.getAccountType());
+			ps.setDouble(3, account.getBalance());
+			ps.setString(4, account.getAccountNumber());
+			ps.setInt(5, account.getPinNo());
+
+			int rows = ps.executeUpdate();
+			if (rows > 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return status;
+	}
+
+	public Account getAccountByNumber(String accountNumber) {
+		Account acc = null;
+		try (Connection con = UTILITY.DBUtility.getConnect()) {
+			String sql = "SELECT * FROM accounts WHERE account_number=?";
+			PreparedStatement ps = con.prepareStatement(sql);
+			ps.setString(1, accountNumber);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				acc = new Account();
+				acc.setAccountId(rs.getInt("account_id"));
+				acc.setCustomerId(rs.getInt("customer_id"));
+				acc.setAccountType(rs.getString("account_type"));
+				acc.setBalance(rs.getDouble("balance"));
+				acc.setAccountNumber(rs.getString("account_number"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return acc;
+	}
+
+	public double getBalance(String accountno, int pin) {
+		// TODO Auto-generated method stub
+		double balance = 0.0;
+		Connection conn = DBUtility.getConnect();
+		try {
+			String sql = "select balance from accounts where account_number=? and pin_no=?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, accountno);
+			ps.setInt(2, pin);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				balance = rs.getDouble("balance");
+			}
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return balance;
+	}
+
+	public boolean deposit(String accountno, int pin, double amount) {
+	    Connection conn = DBUtility.getConnect();
+	    try {
+	        conn.setAutoCommit(false);
+
+	        String checkSql = "SELECT balance FROM accounts WHERE account_number=? AND pin_no=?";
+	        PreparedStatement psCheck = conn.prepareStatement(checkSql);
+	        psCheck.setString(1, accountno);
+	        psCheck.setInt(2, pin);
+	        ResultSet rs = psCheck.executeQuery();
+
+	        if (!rs.next()) {
+	            System.out.println("Invalid Account Number or PIN!");
+	            return false;
+	        }
+
+	        String sql = "UPDATE accounts SET balance=balance+? WHERE account_number=? AND pin_no=?";
+	        PreparedStatement ps = conn.prepareStatement(sql);
+	        ps.setDouble(1, amount);
+	        ps.setString(2, accountno);
+	        ps.setInt(3, pin);
+	        int i = ps.executeUpdate();
+
+	        if (i <= 0) {
+	            conn.rollback();
+	            return false;
+	        }
+
+	        String txn = "INSERT INTO transactions (account_number, transaction_type, amount, transaction_date) VALUES (?, 'DEPOSIT', ?, NOW())";
+	        PreparedStatement ps2 = conn.prepareStatement(txn);
+	        ps2.setString(1, accountno);
+	        ps2.setDouble(2, amount);
+	        ps2.executeUpdate();
+
+	        conn.commit();
+	        return true;
+
+	    } catch (Exception e) {
+	        try { conn.rollback(); } catch (Exception ex) { ex.printStackTrace(); }
+	        e.printStackTrace();
+	    } finally {
+	        try { conn.setAutoCommit(true); } catch (Exception e) { e.printStackTrace(); }
+	    }
+	    return false;
+	}
+
+		
+
+	public boolean withdraw(String accountno, int pin, double amount) {
+		Connection conn = DBUtility.getConnect();
+		try {
+			conn.setAutoCommit(false); 
+
+			String check = "SELECT balance FROM accounts WHERE account_number=? AND pin_no=?";
+			PreparedStatement psCheck = conn.prepareStatement(check);
+			psCheck.setString(1, accountno);
+			psCheck.setInt(2, pin);
+			ResultSet rs = psCheck.executeQuery();
+
+			if (!rs.next()) {
+				System.out.println("Invalid Account Number or PIN!");
+				return false;
+			}
+
+			double balance = rs.getDouble("balance");
+
+			if (balance >= amount) {
+				String sql = "UPDATE accounts SET balance=balance-? WHERE account_number=? AND pin_no=?";
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ps.setDouble(1, amount);
+				ps.setString(2, accountno);
+				ps.setInt(3, pin);
+				int rowsUpdated = ps.executeUpdate();
+
+				if (rowsUpdated <= 0) {
+					conn.rollback();
+					return false;
+				}
+
+				String txn = "INSERT INTO transactions (account_number, transaction_type, amount, transaction_date) VALUES (?,  'WITHDRAW', ?, NOW())";
+				PreparedStatement ps2 = conn.prepareStatement(txn);
+				ps2.setString(1, accountno);
+
+				ps2.setDouble(2, amount);
+				ps2.executeUpdate();
+
+				conn.commit();
+				return true;
+			} else {
+				System.out.println("Insufficient Balance!");
+			}
+
+		} catch (Exception e) {
+			try {
+				conn.rollback();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.setAutoCommit(true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
+	public boolean sendmoney(String accountno, int pin, String accountno2, double amount) {
+		Connection conn = DBUtility.getConnect();
+		try {
+			conn.setAutoCommit(false); 
+
+			String checkSql = "SELECT balance FROM accounts WHERE account_number=? AND pin_no=?";
+			PreparedStatement checkPs = conn.prepareStatement(checkSql);
+			checkPs.setString(1, accountno);
+			checkPs.setInt(2, pin);
+			ResultSet rs = checkPs.executeQuery();
+
+			if (!rs.next()) {
+				System.out.println("Invalid Account Number or PIN!");
+				return false;
+			}
+
+			double balance = rs.getDouble("balance");
+			if (balance < amount) {
+				System.out.println("Insufficient Balance!");
+				return false;
+			}
+
+			String deductSql = "UPDATE accounts SET balance=balance-? WHERE account_number=? AND pin_no=?";
+			PreparedStatement deductPs = conn.prepareStatement(deductSql);
+			deductPs.setDouble(1, amount);
+			deductPs.setString(2, accountno);
+			deductPs.setInt(3, pin);
+			int i = deductPs.executeUpdate();
+
+			if (i <= 0) {
+				conn.rollback();
+				return false;
+			}
+
+			String creditSql = "UPDATE accounts SET balance=balance+? WHERE account_number=?";
+			PreparedStatement creditPs = conn.prepareStatement(creditSql);
+			creditPs.setDouble(1, amount);
+			creditPs.setString(2, accountno2);
+			int j = creditPs.executeUpdate();
+
+			if (j <= 0) {
+				conn.rollback();
+				return false;
+			}
+
+			String insertSql = "INSERT INTO transactions (account_number, transaction_type, amount, transaction_date) VALUES (?, ?, ?, NOW())";
+			PreparedStatement insertPs = conn.prepareStatement(insertSql);
+
+			insertPs.setString(1, accountno);
+			insertPs.setString(2, "DEBIT");
+			insertPs.setDouble(3, amount);
+			insertPs.executeUpdate();
+
+			insertPs.setString(1, accountno2);
+			insertPs.setString(2, "CREDIT");
+			insertPs.setDouble(3, amount);
+			insertPs.executeUpdate();
+
+			conn.commit();
+			return true;
+
+		} catch (Exception e) {
+			try {
+				conn.rollback();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				conn.setAutoCommit(true); 
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+}
